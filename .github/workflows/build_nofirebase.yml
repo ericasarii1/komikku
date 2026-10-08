@@ -46,11 +46,18 @@ jobs:
       - name: Build app
         run: ./gradlew assemblePreview --no-daemon --stacktrace
 
+      - name: Locate APK
+        id: apk
+        run: |
+          find app/build/outputs -name '*.apk' | tee apk_list.txt
+          APK=$(find app/build/outputs -name '*.apk' | head -1)
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          test -n "$APK"
+
       - name: Sign APK
         run: |
           BUILD_TOOLS="$ANDROID_HOME/build-tools/35.0.1"
-          "$BUILD_TOOLS/zipalign" -f 4 app/build/outputs/apk/preview/app-universal-preview-unsigned.apk aligned.apk || \
-          "$BUILD_TOOLS/zipalign" -f 4 app/build/outputs/apk/preview/*.apk aligned.apk
+          "$BUILD_TOOLS/zipalign" -f 4 "${{ steps.apk.outputs.apk }}" aligned.apk
           "$BUILD_TOOLS/apksigner" sign --ks /tmp/signing.jks --ks-pass pass:komiova123 --key-pass pass:komiova123 --out Komikku-preview.apk aligned.apk
           "$BUILD_TOOLS/apksigner" verify Komikku-preview.apk
 
