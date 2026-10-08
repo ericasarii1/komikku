@@ -25,6 +25,7 @@ jobs:
 
       - name: Stub google-services.json
         run: |
+          mkdir -p app/src/main/assets
           cat > app/google-services.json << 'EOF'
           {
             "project_info": {"project_number": "0", "project_id": "komikku-stub", "storage_bucket": "komikku-stub.appspot.com"},
